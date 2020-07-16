@@ -58,7 +58,7 @@ hint: (e.g., 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push -elp' for details.
 ```
 
-* 이때, 원격 저장소 커밋 목록들과 로컬 저장소의 `git log --oneline` 으로 비교 해보면 다른 점이 반드시 있을 것이다.
+* 이때, 원격 저장소 커밋 목록들과 로컬 저장소의 `git log --oneline` 으로 비교 해보면 다른 점이 반드시 있을 것이다. 
 
 * 해결 방법은 다음과 같다. 
 
