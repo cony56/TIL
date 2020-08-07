@@ -5,6 +5,8 @@ Created on Thu Aug  6 11:31:12 2020
 @author: student
 """
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+import scipy
 import math
 import pandas as pd
 import numpy as np
@@ -15,8 +17,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from tqdm.notebook import tqdm
 from tensorflow.keras.preprocessing import sequence
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Embedding, Bidirectional, LSTM, Dropout
+from tensorflow.keras.layers import concatenate
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -97,60 +101,91 @@ sequences = np.array(sequences)
 
 
 max_feature= 37032+1
-
+# Embedding layer
 x = sequence.pad_sequences(sequences, maxlen = 130, padding='post')
 y = np.array(sentiments)
+
+#TF-IDF 벡터
+
+vectorizer = TfidfVectorizer(min_df = 0.0, analyzer="word", sublinear_tf=True, 
+                             ngram_range=(1,2), max_features=1000) 
+x2 = vectorizer.fit_transform(new_sentences)
+
+X1_train, X1_test, Y_train, Y_test = train_test_split(x2, y , test_size=0.3, random_state=42)
 
 X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size=0.3, 
                                                     random_state=42)
 
+X1_train.sort_indices()
+X1_test.sort_indices()
+#최종 모델링
 xInput = Input(batch_shape=(None, 130))
 xEmbed = Embedding(input_dim=max_feature, output_dim=300,input_length =130)(xInput)
 xLstm = Bidirectional(LSTM(64))(xEmbed)
-xOutput = Dense(1, activation='sigmoid')(xLstm)
-model = Model(xInput, xOutput)
-model.compile(loss='binary_crossentropy', optimizer='adam')
+xLstm = Dropout(0.3)(xLstm)
+
+x2Input = Input(batch_shape=(None, 1000))
+Concat = concatenate([xLstm,x2Input])
+Xhid2 = Dense(200, activation='relu')(Concat)
+Xhid2 = Dropout(0.3)(Xhid2)
+xOutput = Dense(1, activation='sigmoid')(Concat)
+model = Model([xInput,x2Input], xOutput)
+model.compile(loss='binary_crossentropy', optimizer='Adam' )
 model.summary()
 # 학습
-hist = model.fit(X_train, Y_train, 
-                 batch_size=32, 
-                 epochs=3,
-                 validation_data = (X_test, Y_test))
+hist = model.fit([X_train,X1_train], Y_train, 
+                 batch_size=600, 
+                 epochs=4, validation_data=([X_test,X1_test],Y_test))
 
 
-y_hat = model.predict(X_test, batch_size=32)
+y_hat = model.predict([X_test,X1_test], batch_size=32)
 y_hat_class = np.round(y_hat, 0)
 y_hat_class.shape = Y_test.shape
 
 print (("Test accuracy:"),(np.round(accuracy_score(Y_test,y_hat_class),3)))
-# 0.879
-
+# 0.895
+# Epoch 1/5
+# 35/35 [==============================] - 46s 1s/step - loss: 0.6141 - val_loss: 0.4604
+# Epoch 2/5
+# 35/35 [==============================] - 49s 1s/step - loss: 0.3139 - val_loss: 0.2885
+# Epoch 3/5
+# 35/35 [==============================] - 53s 2s/step - loss: 0.1894 - val_loss: 0.2671
+# Epoch 4/5
+# 35/35 [==============================] - 54s 2s/step - loss: 0.1252 - val_loss: 0.2856
+# Epoch 5/5
+# 35/35 [==============================] - 54s 2s/step - loss: 0.0810 - val_loss: 0.3341
+# Test accuracy: 0.892
 #---------------------------------------------------------------------------
+
+x2.shape
+
+
+
 # Doc2 vec
 
-documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(new_sentences)]
-model = Doc2Vec(vector_size=300, alpha=0.025, min_alpha=0.00025, 
-                min_count=10, workers=4, dm =1)
-model.build_vocab(documents)
-model.train(documents, total_examples=model.corpus_count, epochs=10)
+# documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(new_sentences)]
+# model = Doc2Vec(vector_size=300, alpha=0.025, min_alpha=0.00025, 
+#                 min_count=10, workers=4, dm =1)
+# model.build_vocab(documents)
+# model.train(documents, total_examples=model.corpus_count, epochs=10)
 
-RANDOM_SEED = 42
-TEST_SPLIT = 0.2
-X = [model.docvecs[i] for i in range(len(sentences))]
-y = np.array(sentiments)
+# RANDOM_SEED = 42
+# TEST_SPLIT = 0.2
+# X = [model.docvecs[i] for i in range(len(sentences))]
+# y = np.array(sentiments)
 
-X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=TEST_SPLIT, 
-                                                    random_state=RANDOM_SEED)
+# X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=TEST_SPLIT, 
+#                                                     random_state=RANDOM_SEED)
 
 
-# Logistic Regression으로 학습 데이터를 학습한다
-lgs = LogisticRegression(class_weight='balanced', solver='newton-cg') 
-lgs.fit(X_train, y_train)
+# # Logistic Regression으로 학습 데이터를 학습한다
+# lgs = LogisticRegression(class_weight='balanced', solver='newton-cg') 
+# lgs.fit(X_train, y_train)
 
-# 시험 데이터로 학습 성능을 평가한다
-predicted = lgs.predict(X_eval)
-print(predicted[:20])
-print("Accuracy: %f" % lgs.score(X_eval, y_eval))
+# # 시험 데이터로 학습 성능을 평가한다
+# predicted = lgs.predict(X_eval)
+# print(predicted[:20])
+# print("Accuracy: %f" % lgs.score(X_eval, y_eval))
 
 
 
