@@ -24,3 +24,6 @@ elem_email.send_keys('cony56')
 elem_pass =driver.find_element_by_id('password')
 elem_pass.send_keys(['tae940902'])
 elem_pass.send_keys(Keys.RETURN)
+
+profile_a = driver.find_element_by_xpath('a태그로 되어있는 정보')
+print("Profile A =>", profile_a.get_attribute('href'))
