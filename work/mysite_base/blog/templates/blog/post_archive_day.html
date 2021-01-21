@@ -1,0 +1,13 @@
+  
+<h1>일변 등록된 게시물 {{ day|date:'Y-m-d' }}</h1>
+
+<div>
+    <ul>
+    {% for post in object_list %}
+        <li>
+            {{ post.modify_date|date:"Y-m-d" }}&nbsp;&nbsp;
+            <a href="{{ post.get_absolute_url }}"><strong>{{ post.title }}</strong></a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>

@@ -1,0 +1,25 @@
+<h1>Post Archives for {{month|date:'Y, N'}}</h1>
+
+<ul>
+    {% for date in date_list %}
+        <li style='display inline;'>
+    <a href="{% url 'blog:post_day_archive' date|date:'Y' date|date:'m' date|date:'d' %}">{{date|date:'Y-m-d'}}</a>
+            </li>
+    {% endfor %}
+    </ul>
+    <br/>
+    <div>
+        <ul>
+   {% for post in object_list %}
+        <li>
+        {{post.modify_date|date:"Y-m-d"}}&nbsp;&nbsp;
+        <a href="{{ post.get_absolute_url }}"><strong>{{post.title}}</strong></a>
+        </li>
+    {% endfor %}
+</ul>
+</br>
+</div>
+    <ul>
+        
+    </ul>
+</div>

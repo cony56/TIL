@@ -1,0 +1,20 @@
+<h1>Blog List</h1>
+
+<!-- display blog list -->
+{% for post in posts%}
+    <h2><a href="{{ post.get_absolute_url }}">{{post.title}}</a></h2>
+    {{ object.modify_date|date:"Y-m-d:H:i"}}
+    <p>{{post.description}}
+{% endfor %}
+<br/>
+
+<!-- paging link -->
+<div>
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number}}">Prev</a>
+    {% endif %}
+    [Page {{ page_obj.number }}/ {{ page_obj.paginator.num_pages}}]
+    {% if page_obj.has_next %}
+        <a href="?page={{page_obj.next_page_number}}">Next</a>
+    {% endif %}
+</div>
