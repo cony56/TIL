@@ -3,6 +3,10 @@ from django.views.generic import ArchiveIndexView, YearArchiveView
 from django.views.generic import MonthArchiveView, DayArchiveView, TodayArchiveView
 from blog.models import Post
 
+from blog.forms import PostSearchForm
+from django.views.generic.edit import FormView
+from django.db.models import Q
+from django.shortcuts import render
 # Create your views here.
 class PostLV(ListView):
     model = Post
@@ -37,3 +41,21 @@ class PostTAV(TodayArchiveView):
     model = Post
     date_field ="modify_date"
     month_format = "%m"
+
+class SearchFormView(FormView):
+    form_class = PostSearchForm # forms.py에 생성
+    template_name = "blog/post_search.html"
+
+    def form_valid(self, form):
+        schword = self.request.POST['search_word']
+        
+        post_list = Post.objects.filter(Q(title__icontains=schword) | Q(description__icontains=schword) | Q(content__icontains=schword)).distinct()
+        #검색된 결과
+        context = {}
+        #form 객체 -> form.as_table의 객체(검색창)
+        context['form'] = form
+        context['search_keyword'] = schword
+        context['search_list'] = post_list
+
+        print(post_list)
+        return render(self.request, self.template_name, context)

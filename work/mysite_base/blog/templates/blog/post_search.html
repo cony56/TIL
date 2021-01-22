@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title%} 검색 페이지 {% endblock %}
+{% block content %}
+<div id='content'>
+    <h1> Blog Search Engine </h1>
+    <form action="" method='POST'>
+        {% csrf_token %}
+    <!--CSRF 검증에 실패했습니다.-->
+    <!--CSRF 쿠키 전달-> 요청이 위조되지 않았다! (증명)-->
+    <!--Cross-site request forgery-->
+        {{ form.as_table }}
+        <input type="submit" value="Search">
+        </form>
+        <br/><br/>
+        {% if search_list %}
+           {% for post in search_list %}
+           <h3>{{post.title}}</h3>
+                {{post.modify_date|date:"Y-m-d"}}
+                <p>{{post.description}}</p>
+           {% endfor %}
+        
+        {% elif search_keyword %}
+            [{{search_keyword}}]의 검색 결과가 없습니다.
+        {% endif %}
+
+</div>
+
+{% endblock %}
