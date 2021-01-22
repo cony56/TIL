@@ -1,3 +1,9 @@
+{% extends "base.html" %}
+
+{% block title%} Post Archive {% endblock %}
+
+{%block content %}
+<div id="content">
 <h1>Post Archives until {% now "Y m d" %}</h1>
 
 <ul>
@@ -23,3 +29,5 @@
         
     </ul>
 </div>
+</div>
+{% endblock %}

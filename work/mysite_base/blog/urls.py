@@ -19,4 +19,8 @@ urlpatterns = [
     path('<int:year>/<str:month>/<int:day>/', PostDAV.as_view(), name='post_day_archive'),
     # /blog/2018/nov/12,day/ -> http://127.0.0.1:8000/blog/today/
     path('today/', PostTAV.as_view(),name='post_today_archive'),
+
+    # Search: /search/ -> http://127.0.0.1:8000/blog/search/
+    path('search/', SearchFormView.as_view(), name='search'),
+    
 ]

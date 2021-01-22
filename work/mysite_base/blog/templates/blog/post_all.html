@@ -1,5 +1,10 @@
-<h1>Blog List</h1>
+{% extends "base.html" %}
 
+{%block title%} <h1>Blog List</h1>
+{% endblock %}
+
+{%block content %}
+<div id ='content'>
 <!-- display blog list -->
 {% for post in posts%}
     <h2><a href="{{ post.get_absolute_url }}">{{post.title}}</a></h2>
@@ -18,3 +23,5 @@
         <a href="?page={{page_obj.next_page_number}}">Next</a>
     {% endif %}
 </div>
+</div>
+{% endblock %}

@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+{% block title%} 월별 포스트 {% endblock %}
+{%block content %}
+<div id="content">
 <h1>Post Archives for {{month|date:'Y, N'}}</h1>
 
 <ul>
@@ -23,3 +27,5 @@
         
     </ul>
 </div>
+</div>
+{% endblock %}
