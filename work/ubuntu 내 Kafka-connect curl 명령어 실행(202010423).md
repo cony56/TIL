@@ -1,5 +1,11 @@
 ## ubuntu 내 Kafka-connect curl 명령어 실행
 
+kafka 접속
+
+`bin/connect-distributed ./etc/kafka/connect-distributed.properties`
+
+
+
 0) 토픽 생성
 
 `bin/kafka-topics.sh --create --bootstrap-server 184.73.31.161:9092 --topic(토픽이름) `
@@ -70,7 +76,7 @@ AWS 보안그룹에 가서 Inbound규칙에 mysql의 port를 모든 서버에 �
 echo '      
 
 {
-    "name" : "market_source7",
+    "name" : "market_source",
     "config" : {
         "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
         "connection.url" : "jdbc:mysql://172.31.18.246:49156/mysql",
@@ -86,7 +92,6 @@ echo '
         "db.timezone": "UTC"
     }
 }
-
 ' | curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
 ```
 
@@ -100,22 +105,34 @@ echo '
 
 
 
+6) kafka 목록 확인
+
+`curl http://localhost:8083/connectors | jq`
+
+7) kafka connect status 확인
+
+`curl http://localhost:8083/connectors/(커넥터이름)/status | jq`
+
+8) connector 상태 이상할 시 삭제
+
+`curl -X DELETE -s "http://{ip}:8083/connㅋectors/test-connector"`
+
 ### Kafka sink connector
 
 ```
 echo ' 
 {
-    "name" : "market_sink7",
+    "name" : "market_sink",
     "config" : {
         "connector.class" : "io.confluent.connect.jdbc.JdbcSinkConnector",
-        "connection.url" : "jdbc:mysql://localhost:13306/base",
-        "connection.user" : "root",
-        "connection.password" : "",
+        "connection.url" : "jdbc:mysql://marketdt.cblvwasqgnme.us-east-1.rds.amazonaws.com:3306/market",
+        "connection.user" : "admin",
+        "connection.password" : "12345678",
         "auto.create":"true",
         "auto.evolve":"true",
         "delete.enabled":"false",
 	"tasks.max":"1",
-	"topics":"my_topic_test",
+	"topics":"market_test",
         "db.timezone": "UTC",
 "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
 "value.deserializer":"org.apache.kafka.common.serialization.StringDeserializer"
@@ -124,3 +141,31 @@ echo '
 ' | curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
 ```
 
+echo '      
+
+{
+    "name" : "market_source",
+    "config" : {
+        "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "connection.url" : "jdbc:mysql://172.31.18.246:49156/mysql",
+        "connection.user" : "root",
+        "connection.password" : "",
+        "mode" : "bulk",
+        "incrementing.colum.name" : "index",
+        "table.whitelist" : "test",
+        "topic.prefix" : "market_",
+        "tasks.max" : "1",
+      "key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+"value.serializer":"org.apache.kafka.common.serialization.StringSerializer",
+        "db.timezone": "UTC"
+    }
+}
+' | curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
+
+
+
+## db utf-8 오류
+
+show variables like 'c%';
+
+-> 컬럼 어떤 포맷으로 저장됐는지 확인가능
