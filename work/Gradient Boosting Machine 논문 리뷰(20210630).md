@@ -14,6 +14,13 @@ $$
 F^* = \mathop{\arg\min}_{F}E_{y,x}L(y,F(x)) = \mathop{arg min}_{F}E_{x}[E_y(L(y,F(x)))| x]
 $$
 
+
+
+<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
+
+
+
+
 찾고자하는 F'은 x가 주어졌을 때 y와 F(x)로 이루어진 손실함수(보통 MSE, negative-log likelihood, squared_error 등)에 대해 전 구간의 평균값을 minimize 하는 함수
 
 * x에 대한 함수를 여러 파라미터를 갖는 함수로 확장시킴
@@ -53,7 +60,6 @@ $$
   P^* = \sum_{m=0}^M p_m
   $$
   
-
 * 
 
 
